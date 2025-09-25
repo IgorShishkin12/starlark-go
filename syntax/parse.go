@@ -11,7 +11,11 @@ package syntax
 // package.  Verify that error positions are correct using the
 // chunkedfile mechanism.
 
-import "log"
+import (
+	// "fmt"
+	"log"
+	"strings"
+)
 
 // Enable this flag to print the token stream and log.Fatal on the first error.
 const debug = false
@@ -831,29 +835,66 @@ func (p *parser) parsePrimary() Expr {
 	case FSTRING_FULL:
 		val := "fstring: "+ p.tokval.string
 		// raw := p.tokval.raw
+		response := Literal{T
 		pos := p.nextToken()
+		return &Literal{Token: p.tok,TokenPos: }
 		return &FStringExpr{Raw: val,TokenPos: pos,}
 		// panic(0)
 		// fmt.Println("working on fstring")
 	case FSTRING_PART:
-		data := p.tokval.string
+		//this is test code
+		resultString := strings.Builder{}
+		resultString.WriteString(p.tokval.string)
 		toktmp := p.tok
+		startpos := p.in.pos
 		pos := p.nextToken()
-		resultExpr :=FStringExpr{Raw: "fstring: "+ data,TokenPos: pos}
-		strIdentExpr := Ident{Name:"str"}
+		// resultExpr :=FStringExpr{Raw: "fstring: "+ data,TokenPos: pos}
+		// formatIdentExpr := Ident{Name:"format"}
+		// dotExpr := DotExpr{}
+		callFormatExpr := CallExpr{Lparen: pos}
 		for(toktmp!=FSTRING_END){
-			Lpos := p.in.pos
+			// Lpos := p.in.pos
 			//we prohibit using something like f"hehe{}hehe" but it is possible to process this. look into it, todo
 			tmpexpr := p.parseTestPrec(0)
-			callStrExpr := CallExpr{Fn:&strIdentExpr,Lparen: Lpos,Args: []Expr{tmpexpr},Rparen: p.in.pos}//idea: call str() on what inside {} so we will need only take result of string and add it to fstr
+			callFormatExpr.Args = append(callFormatExpr.Args, tmpexpr)
+			// callStrExpr := CallExpr{Fn:&strIdentExpr,Lparen: Lpos,Args: []Expr{tmpexpr},Rparen: p.in.pos}//idea: call str() on what inside {} so we will need only take result of string and add it to fstr
 			//idea2: use Binop + and add argument to it callexpr and fstring body as simple string.
-			resultExpr.Args = append(resultExpr.Args,  &callStrExpr)
-			data = p.tokval.string
-			resultExpr.Raw += "{put here}"+data
+			// resultExpr.Args = append(resultExpr.Args,  &callStrExpr)
+			resultString.WriteString("{}")
+			resultString.WriteString(p.tokval.string)
+			// resultExpr.Raw += "{put here}"+data
 			toktmp = p.tok
 			p.nextToken()
 		}
-		return &resultExpr
+		data:=resultString.String()
+		// fmt.Print(data)
+		callFormatExpr.Fn = &DotExpr{X: &Literal{Raw: "\""+data+"\"",Value: data,TokenPos: startpos,Token: STRING},Name:&Ident{Name:"format"}}
+		callFormatExpr.Rparen = p.in.pos
+		return &callFormatExpr
+
+
+
+
+
+		//this is correct code 
+		// data := p.tokval.string
+		// toktmp := p.tok
+		// pos := p.nextToken()
+		// resultExpr :=FStringExpr{Raw: "fstring: "+ data,TokenPos: pos}
+		// strIdentExpr := Ident{Name:"str"}
+		// for(toktmp!=FSTRING_END){
+		// 	Lpos := p.in.pos
+		// 	//we prohibit using something like f"hehe{}hehe" but it is possible to process this. look into it, todo
+		// 	tmpexpr := p.parseTestPrec(0)
+		// 	callStrExpr := CallExpr{Fn:&strIdentExpr,Lparen: Lpos,Args: []Expr{tmpexpr},Rparen: p.in.pos}//idea: call str() on what inside {} so we will need only take result of string and add it to fstr
+		// 	//idea2: use Binop + and add argument to it callexpr and fstring body as simple string.
+		// 	resultExpr.Args = append(resultExpr.Args,  &callStrExpr)
+		// 	data = p.tokval.string
+		// 	resultExpr.Raw += "{put here}"+data
+		// 	toktmp = p.tok
+		// 	p.nextToken()
+		// }
+		// return &resultExpr
 
 	
 
