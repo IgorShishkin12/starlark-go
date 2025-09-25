@@ -833,12 +833,13 @@ func (p *parser) parsePrimary() Expr {
 		pos := p.nextToken()
 		return &Literal{Token: tok, TokenPos: pos, Raw: raw, Value: val}
 	case FSTRING_FULL:
-		val := "fstring: "+ p.tokval.string
+		val := p.tokval.string
+		raw := p.tokval.raw
 		// raw := p.tokval.raw
-		response := Literal{T
 		pos := p.nextToken()
-		return &Literal{Token: p.tok,TokenPos: }
-		return &FStringExpr{Raw: val,TokenPos: pos,}
+		response := Literal{Token: p.tok,TokenPos: pos,Raw: raw,Value: val}
+		return &response
+		// return &FStringExpr{Raw: val,TokenPos: pos,}
 		// panic(0)
 		// fmt.Println("working on fstring")
 	case FSTRING_PART:
