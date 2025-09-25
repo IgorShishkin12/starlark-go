@@ -1016,7 +1016,7 @@ func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token {//tokens: ful
 	// start := sc.pos
 	triple := len(sc.rest) >= 3 && sc.rest[0] == byte(quote) && sc.rest[1] == byte(quote) && sc.rest[2] == byte(quote)
 
-	
+
 	isbeginning := true
 	isend := true
 	if quote == '{'{
@@ -1066,6 +1066,15 @@ startQuote :=len(sc.token)-len(sc.rest)
 					isend = false
 					quoteCount = 1
 					break
+				}else{
+					sc.readRune()
+				}
+			}
+			if c == '}'{
+				if ((len(sc.rest)>1 && sc.rest[0] == '}')){
+					sc.readRune()
+				}else{
+					sc.error(val.pos,"expect \"}}\" or \"{expression}\", got single\"}\"")
 				}
 			}
 			if c == '\n' {
@@ -1101,12 +1110,22 @@ startQuote :=len(sc.token)-len(sc.rest)
 			} else {
 				quoteCount = 0
 			}
+
 			if c == '{'{
 				if (!(len(sc.rest)>1 && sc.rest[0] == '{')){
 					sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '{',startDepth: sc.depth})
 					isend = false
 					quoteCount = 1
 					break
+				}else{
+					sc.readRune()
+				}
+			}
+			if c == '}'{
+				if ((len(sc.rest)>1 && sc.rest[0] == '}')){
+					sc.readRune()
+				}else{
+					sc.error(val.pos,"expect \"}}\" or \"{expression}\", got single \"}\"")
 				}
 			}
 			if c == '\\' {
