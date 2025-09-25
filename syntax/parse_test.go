@@ -132,6 +132,22 @@ func TestExprParseTrees(t *testing.T) {
 	}
 }
 
+func TestTmp(t *testing.T){
+
+	t.Log("---------------------------------------\n")
+	text := `f"he{7+7}he"`
+		e, err := syntax.ParseExpr("foo.star", text, 0)
+	var got string
+	if err != nil {
+		got = stripPos(err)
+	} else {
+		got = treeString(e)
+	}
+
+	t.Log(got)
+	t.Log("---------------------------------------\n")
+}
+
 func TestStmtParseTrees(t *testing.T) {
 	for _, test := range []struct {
 		input, want string
@@ -362,6 +378,8 @@ func writeTree(out *bytes.Buffer, x reflect.Value) {
 		switch v := x.Interface().(type) {
 		case syntax.Literal:
 			switch v.Token {
+			case syntax.FSTRING_FULL:
+				fmt.Fprintf(out, "%q", v.Value)
 			case syntax.STRING:
 				fmt.Fprintf(out, "%q", v.Value)
 			case syntax.BYTES:

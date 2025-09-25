@@ -71,6 +71,36 @@ func TestPlusFolding(t *testing.T) {
 		}
 	}
 }
+func TestFstring(t *testing.T) {
+	isPredeclared := func(name string) bool { return name == "x" }
+	isUniversal := func(name string) bool { return false }
+	for i, test := range []struct {
+		src  string // source expression
+		want string // disassembled code
+	}{
+		{
+			`f"hehehe"`,
+			`constant "abcd"; return`,
+		},
+	} {
+		expr, err := syntax.ParseExpr("in.star", test.src, 0)
+		if err != nil {
+			t.Errorf("#%d: %v", i, err)
+			continue
+		}
+		locals, err := resolve.Expr(expr, isPredeclared, isUniversal)
+		if err != nil {
+			t.Errorf("#%d: %v", i, err)
+			continue
+		}
+		got := disassemble(Expr(syntax.LegacyFileOptions(), expr, "<expr>", locals).Toplevel)
+		t.Logf("disassemble: %s",got)
+		// if test.want != got {
+		// 	t.Errorf("expression <<%s>> generated <<%s>>, want <<%s>>",
+		// 		test.src, got, test.want)
+		// }
+	}
+}
 
 // disassemble is a trivial disassembler tailored to the accumulator test.
 func disassemble(f *Funcode) string {

@@ -644,7 +644,8 @@ func (r *resolver) expr(e syntax.Expr) {
 	switch e := e.(type) {
 	case *syntax.Ident:
 		r.use(e)
-
+	case *syntax.FStringExpr:
+		
 	case *syntax.Literal:
 
 	case *syntax.ListExpr:

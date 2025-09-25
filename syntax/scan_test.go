@@ -24,6 +24,7 @@ func scan(src interface{}) (tokens string, err error) {
 
 	var buf bytes.Buffer
 	var val tokenValue
+	prevtok := Token(0)
 	for {
 		tok := sc.nextToken(&val)
 
@@ -45,14 +46,38 @@ func scan(src interface{}) (tokens string, err error) {
 			fmt.Fprintf(&buf, "%e", val.float)
 		case STRING, BYTES:
 			buf.WriteString(Quote(val.string, tok == BYTES))
+		case FSTRING_FULL:
+			buf.WriteString(Quote(val.string, false))
+		case FSTRING_PART:
+			if (prevtok == FSTRING_PART){
+				buf.WriteString(")+\""+val.string+"\"+str(")
+			}else{
+				buf.WriteString("\""+val.string+"\"+str(")
+			}
+		case FSTRING_END:
+			buf.WriteString(")+\""+val.string+"\"")
+			
 		default:
 			buf.WriteString(tok.String())
 		}
+		prevtok = tok
 		if tok == EOF {
 			break
 		}
 	}
 	return buf.String(), nil
+}
+func TestTmp(t *testing.T) {
+	// t.Log("hehe\nhehe\nhehe")
+	t.Log("---------------------------------------\n")
+	got, err := scan(`f"hehh{7+8} haha"`)
+	if err != nil {
+		got = "error: "+ err.(Error).Error()
+	}
+	// Prefix match allows us to truncate errors in expectations.
+	// Success cases all end in EOF.
+	t.Log(got)
+	t.Log("---------------------------------------\n")
 }
 
 func TestScanner(t *testing.T) {
