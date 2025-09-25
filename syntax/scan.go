@@ -792,9 +792,11 @@ start:
 			c = sc.peekRune()
 			if c == '\''{
 				sc.fstringStack.Push(fstringStackNode{pos: sc.pos,tokenType: '+',startDepth: sc.depth})
+				c = '+'
 			}
 			if c == '"'{
 				sc.fstringStack.Push(fstringStackNode{pos: sc.pos,tokenType: '-',startDepth: sc.depth})
+				c = '-'
 			}
 			resp := sc.scanFstring(val, c)
 			if(resp == FSTRING_END || resp == FSTRING_FULL){
@@ -1090,11 +1092,10 @@ startQuote :=len(sc.token)-len(sc.rest)
 		}
 	} else {
 		// triple-quoted string literal
-		sc.readRune()
-		raw.WriteRune(quote)
-		sc.readRune()
-		raw.WriteRune(quote)
-		startQuote+=2
+		// sc.readRune()
+		// raw.WriteRune(quote)
+		// sc.readRune()
+		// raw.WriteRune(quote)
 
 		for {
 			if sc.eof() {
