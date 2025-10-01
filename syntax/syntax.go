@@ -240,14 +240,14 @@ func (*TupleExpr) expr()     {}
 func (*UnaryExpr) expr()     {}
 func (*FStringExpr) expr()   {}
 
-type FStringExpr struct{
+type FStringExpr struct {
 	commentsRef
 	TokenPos Position
-	Raw string
-	Args []Expr
+	Raw      string
+	Args     []Expr
 }
 
-func (x *FStringExpr) Span() (start,end Position){
+func (x *FStringExpr) Span() (start, end Position) {
 	return x.TokenPos, x.TokenPos.add(x.Raw)
 }
 

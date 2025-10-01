@@ -285,51 +285,50 @@ func (p Position) isBefore(q Position) bool {
 	return p.Col < q.Col
 }
 
-
-
 // Stack structure with a type parameter
 type Stack[T any] struct {
-    elements []T
+	elements []T
 }
 
 // Push adds an element to the stack
 func (s *Stack[T]) Push(element T) {
-    s.elements = append(s.elements, element)
+	s.elements = append(s.elements, element)
 }
 
 // Pop removes and returns the last element from the stack
 func (s *Stack[T]) Pop() (T, bool) {
-    if len(s.elements) == 0 {
-        var zeroValue T // Create a zero value of type T
-        return zeroValue, false // Stack is empty
-    }
-    element := s.elements[len(s.elements)-1]
-    s.elements = s.elements[:len(s.elements)-1] // Remove last element
-    return element, true
+	if len(s.elements) == 0 {
+		var zeroValue T         // Create a zero value of type T
+		return zeroValue, false // Stack is empty
+	}
+	element := s.elements[len(s.elements)-1]
+	s.elements = s.elements[:len(s.elements)-1] // Remove last element
+	return element, true
 }
 
 // Peek returns the last element from the stack
 func (s *Stack[T]) Peek() (T, bool) {
-    if len(s.elements) == 0 {
-        var zeroValue T // Create a zero value of type T
-        return zeroValue, false // Stack is empty
-    }
-    element := s.elements[len(s.elements)-1]
-    return element, true
+	if len(s.elements) == 0 {
+		var zeroValue T         // Create a zero value of type T
+		return zeroValue, false // Stack is empty
+	}
+	element := s.elements[len(s.elements)-1]
+	return element, true
 }
+
 // PeekN returns the nth element from the end stack (0 is last)
 func (s *Stack[T]) PeekN(n int) (T, bool) {
-    if len(s.elements) < n{
-        var zeroValue T // Create a zero value of type T
-        return zeroValue, false // Stack is empty
-    }
-    element := s.elements[len(s.elements)-1-n]
-    return element, true
+	if len(s.elements) < n {
+		var zeroValue T         // Create a zero value of type T
+		return zeroValue, false // Stack is empty
+	}
+	element := s.elements[len(s.elements)-1-n]
+	return element, true
 }
 
 // Size returns the number of elements in the stack
 func (s *Stack[T]) Size() int {
-    return len(s.elements)
+	return len(s.elements)
 }
 
 // func main() {
@@ -347,12 +346,10 @@ func (s *Stack[T]) Size() int {
 //     fmt.Println("Size of string stack after pop:", stringStack.Size()) // Output: Size of string stack after pop: 1
 // }
 
-
-
-type fstringStackNode struct{
-	pos 		Position
-	tokenType 	rune
-	startDepth   int
+type fstringStackNode struct {
+	pos        Position
+	tokenType  rune
+	startDepth int
 }
 
 // An scanner represents a single input file being parsed.
@@ -742,13 +739,13 @@ start:
 
 	// start of the next token
 	sc.startToken(val)
-	if (sc.shouldScanFstring(c)){
-		if c == '}'{
+	if sc.shouldScanFstring(c) {
+		if c == '}' {
 			//assert sc.fstring.Peek().val.tokentype == '{' todo
 			tmpval, _ := sc.fstringStack.Pop()
 			// tmpval, _ := sc.fstringStack.Peek()
-			resp := sc.scanFstring(val,tmpval.tokenType)
-			if (resp == FSTRING_END || resp == FSTRING_FULL){
+			resp := sc.scanFstring(val, tmpval.tokenType)
+			if resp == FSTRING_END || resp == FSTRING_FULL {
 				sc.fstringStack.Pop()
 			}
 			return resp
@@ -782,24 +779,24 @@ start:
 			sc.readRune()
 			c = sc.peekRune()
 			return sc.scanString(val, c)
-		} else if c == 'f' && len(sc.rest) > 3 && 
-							((sc.rest[1] == sc.rest[2] && sc.rest[1] == sc.rest[3]) && 
-							(sc.rest[1] == '\''|| sc.rest[1] == '"')) {
+		} else if c == 'f' && len(sc.rest) > 3 &&
+			((sc.rest[1] == sc.rest[2] && sc.rest[1] == sc.rest[3]) &&
+				(sc.rest[1] == '\'' || sc.rest[1] == '"')) {
 			// f"""...""" or f'''...'''
 			sc.readRune()
 			sc.readRune()
 			sc.readRune()
 			c = sc.peekRune()
-			if c == '\''{
-				sc.fstringStack.Push(fstringStackNode{pos: sc.pos,tokenType: '+',startDepth: sc.depth})
+			if c == '\'' {
+				sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '+', startDepth: sc.depth})
 				c = '+'
 			}
-			if c == '"'{
-				sc.fstringStack.Push(fstringStackNode{pos: sc.pos,tokenType: '-',startDepth: sc.depth})
+			if c == '"' {
+				sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '-', startDepth: sc.depth})
 				c = '-'
 			}
 			resp := sc.scanFstring(val, c)
-			if(resp == FSTRING_END || resp == FSTRING_FULL){
+			if resp == FSTRING_END || resp == FSTRING_FULL {
 				sc.fstringStack.Pop()
 			}
 			return resp
@@ -807,13 +804,13 @@ start:
 			// f"..."
 			sc.readRune()
 			c = sc.peekRune()
-			sc.fstringStack.Push(fstringStackNode{pos: sc.pos,tokenType: c,startDepth: sc.depth})
+			sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: c, startDepth: sc.depth})
 			resp := sc.scanFstring(val, c)
-			if(resp == FSTRING_END || resp == FSTRING_FULL){
+			if resp == FSTRING_END || resp == FSTRING_FULL {
 				sc.fstringStack.Pop()
 			}
 			return resp
-		 } 
+		}
 		for isIdent(c) {
 			sc.readRune()
 			c = sc.peekRune()
@@ -981,58 +978,57 @@ start:
 	panic("unreachable")
 }
 
-func (sc *scanner) shouldScanFstring(c rune) bool{// we falling into scanning fstring if it start of fstring (i.e. f")(not looking into this, because we will fall into it in corresponding part) or end of one of its parts
-	if (sc.fstringStack.Size()==0 ){
+func (sc *scanner) shouldScanFstring(c rune) bool { // we falling into scanning fstring if it start of fstring (i.e. f")(not looking into this, because we will fall into it in corresponding part) or end of one of its parts
+	if sc.fstringStack.Size() == 0 {
 		return false
 	}
 	val, _ := sc.fstringStack.Peek()
-	if (val.startDepth<sc.depth){
+	if val.startDepth < sc.depth {
 		return false
 	}
-	if (c == '}' && val.tokenType == '{'){
+	if c == '}' && val.tokenType == '{' {
 		return true
 	}
 	//todo: everything after is always false?
-	if (c == '\'' && val.tokenType == '\''){
+	if c == '\'' && val.tokenType == '\'' {
 		return true
 	}
-	if (c == '"' && val.tokenType == '"'){
+	if c == '"' && val.tokenType == '"' {
 		return true
 	}
-	if (len(sc.rest)>=3){
-		if (val.tokenType == '+'){// + for '''
-		if(c == '\'' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c)){
-			return true
+	if len(sc.rest) >= 3 {
+		if val.tokenType == '+' { // + for '''
+			if c == '\'' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c) {
+				return true
+			}
 		}
-	}
-		if (val.tokenType == '-'){// - for """
-		if(c == '"' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c)){
-			return true
+		if val.tokenType == '-' { // - for """
+			if c == '"' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c) {
+				return true
+			}
 		}
-	}
 	}
 	return false
 }
 
-func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token {//tokens: full_fstring(if it simple string), fstring_part, end_expr_fstring
+func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token { //tokens: full_fstring(if it simple string), fstring_part, end_expr_fstring
 	// start := sc.pos
 	triple := len(sc.rest) >= 3 && sc.rest[0] == byte(quote) && sc.rest[1] == byte(quote) && sc.rest[2] == byte(quote)
 
-
 	isbeginning := true
 	isend := true
-	if quote == '{'{
+	if quote == '{' {
 		tmpval, _ := sc.fstringStack.Peek()
 		quote = tmpval.tokenType
 		isbeginning = false
 	}
-	if quote == '+'{
-	quote = '\''
-	triple = true
+	if quote == '+' {
+		quote = '\''
+		triple = true
 	}
 	if quote == '-' {
-	quote = '"'
-	triple = true
+		quote = '"'
+		triple = true
 	}
 
 	sc.readRune()
@@ -1048,8 +1044,8 @@ func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token {//tokens: ful
 	// Copy the prefix, e.g. r' or " (see startToken).
 	raw.Write(sc.token[:len(sc.token)-len(sc.rest)])
 
-quoteCount := 0
-startQuote :=len(sc.token)-len(sc.rest)
+	quoteCount := 0
+	startQuote := len(sc.token) - len(sc.rest)
 	if !triple {
 		// single-quoted string literal
 		for {
@@ -1062,21 +1058,21 @@ startQuote :=len(sc.token)-len(sc.rest)
 				quoteCount = 1
 				break
 			}
-			if c == '{'{
-				if (!(len(sc.rest)>1 && sc.rest[0] == '{')){
-					sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '{',startDepth: sc.depth})
+			if c == '{' {
+				if !(len(sc.rest) > 1 && sc.rest[0] == '{') {
+					sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '{', startDepth: sc.depth})
 					isend = false
 					quoteCount = 1
 					break
-				}else{
+				} else {
 					sc.readRune()
 				}
 			}
-			if c == '}'{
-				if ((len(sc.rest)>1 && sc.rest[0] == '}')){
+			if c == '}' {
+				if len(sc.rest) > 1 && sc.rest[0] == '}' {
 					sc.readRune()
-				}else{
-					sc.error(val.pos,"expect \"}}\" or \"{expression}\", got single\"}\"")
+				} else {
+					sc.error(val.pos, "expect \"}}\" or \"{expression}\", got single\"}\"")
 				}
 			}
 			if c == '\n' {
@@ -1112,21 +1108,21 @@ startQuote :=len(sc.token)-len(sc.rest)
 				quoteCount = 0
 			}
 
-			if c == '{'{
-				if (!(len(sc.rest)>1 && sc.rest[0] == '{')){
-					sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '{',startDepth: sc.depth})
+			if c == '{' {
+				if !(len(sc.rest) > 1 && sc.rest[0] == '{') {
+					sc.fstringStack.Push(fstringStackNode{pos: sc.pos, tokenType: '{', startDepth: sc.depth})
 					isend = false
 					quoteCount = 1
 					break
-				}else{
+				} else {
 					sc.readRune()
 				}
 			}
-			if c == '}'{
-				if ((len(sc.rest)>1 && sc.rest[0] == '}')){
+			if c == '}' {
+				if len(sc.rest) > 1 && sc.rest[0] == '}' {
 					sc.readRune()
-				}else{
-					sc.error(val.pos,"expect \"}}\" or \"{expression}\", got single \"}\"")
+				} else {
+					sc.error(val.pos, "expect \"}}\" or \"{expression}\", got single \"}\"")
 				}
 			}
 			if c == '\\' {
@@ -1142,11 +1138,11 @@ startQuote :=len(sc.token)-len(sc.rest)
 	// val.raw = raw.String()
 
 	// s, _, isByte, err := unquote(val.raw)
-	val.string = val.raw[startQuote:raw.Len()-quoteCount]
-	if (isend && isbeginning){
+	val.string = val.raw[startQuote : raw.Len()-quoteCount]
+	if isend && isbeginning {
 		return FSTRING_FULL
 	}
-	if (isend){
+	if isend {
 		return FSTRING_END
 	}
 	return FSTRING_PART

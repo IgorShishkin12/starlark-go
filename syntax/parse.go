@@ -837,7 +837,7 @@ func (p *parser) parsePrimary() Expr {
 		raw := p.tokval.raw
 		// raw := p.tokval.raw
 		pos := p.nextToken()
-		response := Literal{Token: p.tok,TokenPos: pos,Raw: raw,Value: val}
+		response := Literal{Token: p.tok, TokenPos: pos, Raw: raw, Value: val}
 		return &response
 		// return &FStringExpr{Raw: val,TokenPos: pos,}
 		// panic(0)
@@ -853,7 +853,7 @@ func (p *parser) parsePrimary() Expr {
 		// formatIdentExpr := Ident{Name:"format"}
 		// dotExpr := DotExpr{}
 		callFormatExpr := CallExpr{Lparen: pos}
-		for(toktmp!=FSTRING_END){
+		for toktmp != FSTRING_END {
 			// Lpos := p.in.pos
 			//we prohibit using something like f"hehe{}hehe" but it is possible to process this. look into it, todo
 			tmpexpr := p.parseTestPrec(0)
@@ -867,17 +867,13 @@ func (p *parser) parsePrimary() Expr {
 			toktmp = p.tok
 			p.nextToken()
 		}
-		data:=resultString.String()
+		data := resultString.String()
 		// fmt.Print(data)
-		callFormatExpr.Fn = &DotExpr{X: &Literal{Raw: "\""+data+"\"",Value: data,TokenPos: startpos,Token: STRING},Name:&Ident{Name:"format"}}
+		callFormatExpr.Fn = &DotExpr{X: &Literal{Raw: "\"" + data + "\"", Value: data, TokenPos: startpos, Token: STRING}, Name: &Ident{Name: "format"}}
 		callFormatExpr.Rparen = p.in.pos
 		return &callFormatExpr
 
-
-
-
-
-		//this is correct code 
+		//this is correct code
 		// data := p.tokval.string
 		// toktmp := p.tok
 		// pos := p.nextToken()
@@ -896,8 +892,6 @@ func (p *parser) parsePrimary() Expr {
 		// 	p.nextToken()
 		// }
 		// return &resultExpr
-
-	
 
 	case LBRACK:
 		return p.parseList()
