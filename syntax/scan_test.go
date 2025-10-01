@@ -49,14 +49,14 @@ func scan(src interface{}) (tokens string, err error) {
 		case FSTRING_FULL:
 			buf.WriteString(Quote(val.string, false))
 		case FSTRING_PART:
-			if (prevtok == FSTRING_PART){
-				buf.WriteString(")+\""+val.string+"\"+str(")
-			}else{
-				buf.WriteString("\""+val.string+"\"+str(")
+			if prevtok == FSTRING_PART {
+				buf.WriteString(")+\"" + val.string + "\"+str(")
+			} else {
+				buf.WriteString("\"" + val.string + "\"+str(")
 			}
 		case FSTRING_END:
-			buf.WriteString(")+\""+val.string+"\"")
-			
+			buf.WriteString(")+\"" + val.string + "\"")
+
 		default:
 			buf.WriteString(tok.String())
 		}
@@ -67,17 +67,90 @@ func scan(src interface{}) (tokens string, err error) {
 	}
 	return buf.String(), nil
 }
-func TestTmp(t *testing.T) {
-	// t.Log("hehe\nhehe\nhehe")
-	t.Log("---------------------------------------\n")
-	got, err := scan(`f"hehh{7+8} haha"`)
-	if err != nil {
-		got = "error: "+ err.(Error).Error()
+
+func TestScannerFstring(t *testing.T) {
+	brackets := []string{`'`, `'''`, `"`, `"""`}
+	bodys := []string{
+		"@hehe@",
+		"@hehe{0}@",
+		"@hehe{0}hehe@",
+		"@hehe{1+1}@",
+		"@hehe{{}}@",
+		"@@",
+		"@{{}}@",
+		"@{{{0}}}@",
+		"@{{@",
+		"@}}@",
+		"@hehe{1}haha{2}hoho{3}hihi{4}huhu{5}@",
+	} // @ for bracket
+	convert_simple := func(body string) string {
+		want_body := strings.Replace(body, "@", `"`, -1)
+		for _, want_bracket := range []struct{ replcacee, replacement string }{{"{{", "{"}, {"}}", "}"}} {
+			want_body = strings.Replace(want_body, want_bracket.replcacee, want_bracket.replacement, -1)
+		}
+		want_body += " EOF"
+		return want_body
 	}
-	// Prefix match allows us to truncate errors in expectations.
-	// Success cases all end in EOF.
-	t.Log(got)
-	t.Log("---------------------------------------\n")
+	targets := []string{
+		convert_simple(bodys[0]),
+		`"hehe"+str( 0 )+"" EOF`,
+		`"hehe"+str( 0 )+"hehe" EOF`,
+		`"hehe"+str( 1 + 1 )+"" EOF`,
+		convert_simple(bodys[4]),
+		convert_simple(bodys[5]),
+		convert_simple(bodys[6]),
+		`"{"+str( 0 )+"}" EOF`,
+		convert_simple(bodys[8]),
+		convert_simple(bodys[9]),
+		`"hehe"+str( 1 "haha"+str( 2 "hoho"+str( 3 "hihi"+str( 4 "huhu"+str( 5 )+"" EOF`,
+	}
+
+	for _, bracket := range brackets {
+		for id, body := range bodys {
+			test_body := "f" + strings.Replace(body, "@", bracket, -1)
+			got, err := scan(test_body)
+			if err != nil {
+				got = err.(Error).Error()
+				t.Error(got)
+			}
+			want_body := targets[id]
+			// Prefix match allows us to truncate errors in expectations.
+			// Success cases all end in EOF.
+			if !strings.HasPrefix(got, want_body) {
+				t.Errorf("scan `%s` = [%s], want [%s]", test_body, got, want_body)
+			}
+		}
+	}
+}
+
+func TestScannerFstringRecursion(t *testing.T) {
+	brackets := []string{`'`, `'''`, `"`, `"""`}
+	bodys := []string{
+		"@a{f#b{0}#}@",
+	} // @ for bracket, # for different bracket
+	targets := []string{
+		`"a"+str( )+"b"+str( 0 )+"" )+"" EOF`,
+	}
+
+	for _, bracket := range brackets {
+		for _, bracket2 := range brackets {
+			for id, body := range bodys {
+				test_body := "f" + strings.Replace(body, "@", bracket, -1)
+				test_body = strings.Replace(test_body, "#", bracket2, -1)
+				got, err := scan(test_body)
+				if err != nil {
+					got = err.(Error).Error()
+					t.Error(got)
+				}
+				want_body := targets[id]
+				// Prefix match allows us to truncate errors in expectations.
+				// Success cases all end in EOF.
+				if !strings.HasPrefix(got, want_body) {
+					t.Errorf("scan `%s` = [%s], want [%s]", test_body, got, want_body)
+				}
+			}
+		}
+	}
 }
 
 func TestScanner(t *testing.T) {
