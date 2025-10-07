@@ -11,7 +11,6 @@ name = "Starlark"
 version = 1
 assert.eq(f"hello {name}", "hello Starlark")
 assert.eq(f"{name} {version}", "Starlark 1")
-#assert.eq(f"nothing{}", "nothing{}")          # todo: assert fails
 assert.eq(f"{{ literal }}", "{ literal }")   # doubled braces → literal
 
 # --- conversion flags -------------------------------------------------------
@@ -45,9 +44,8 @@ assert.eq(f"{tpl[0]} and {tpl[1]}", "4 and 5")
 # assert.eq(f"{f:.2f}", "1.23")
 
 # --- escaping --------------------------------------------------------------
-#todo: fix escaping
-# assert.eq(f"backslash \\ still one", "backslash \\ still one")
-# assert.eq(f"quotes ' and \" kept", f'quotes \' and " kept')
+assert.eq(f"backslash \\ still one", "backslash \\ still one")
+assert.eq(f"quotes ' and \" kept", 'quotes \' and " kept')
 
 # --- empty f-string --------------------------------------------------------
 
@@ -73,20 +71,23 @@ assert.true(msg.endswith("version 1"))
 assert.eq(f"α = {α}", "α = 2")
 
 # --- errors that must be caught at compile-time ----------------------------
-
+#todo? more sound errors, now raises with text: `expect "}}" or "{expression}", got single"}"` on almost all errors
 # (Un-comment each block to verify the parser rejects it.)
 
 # 1. single '}' without '{'
 # assert.fails(lambda: f"oops}", "single '}' in format")
 
-# 2. unmatched '{'
+# 2. unmatched '{' #now says "unexpected new line in string". is it ok?
 # assert.fails(lambda: f"oops{", "unmatched '{' in format")
 
-# 3. invalid expression inside braces
+# 3. invalid expression inside braces # now fails with "got , want primary expression"
 # assert.fails(lambda: f"{1+}", "invalid syntax")
 
-# 4. unknown conversion
+# 4. unknown conversion #future plans?
 # assert.fails(lambda: f"{pi!z}", "unknown conversion")
+
+# 5. # now fails with "got , want primary expression"
+# assert.fails(lambda: f"nothing{}", "nothing{}")          # todo: assert fails
 
 # --- runtime errors --------------------------------------------------------
 
@@ -109,12 +110,9 @@ assert.eq(f"A" + f"{name}" + f"B", "AStarlarkB")
 
 # raw *and* f is illegal in Python; Starlark should follow
 # (un-comment to check)
-# assert.fails(lambda: rf"{name}", "cannot use both raw and f-string")
+# assert.fails(lambda: rf"{name}", "cannot use both raw and f-string") #todo?
 
 # --- edge cases ------------------------------------------------------------
-
-# only braces
-# assert.eq(f"{}", "{}") # todo:assert fails
 
 # only doubled braces
 assert.eq(f"{{}}", "{}")

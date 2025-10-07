@@ -1305,13 +1305,9 @@ func (fcomp *fcomp) expr(e syntax.Expr) {
 		if e.Token == syntax.BYTES {
 			v = Bytes(v.(string))
 		}
-		if e.Token == syntax.FSTRING_FULL {
-			fmt.Print("compiling Fstring")
-		}
 		fcomp.emit1(CONSTANT, fcomp.pcomp.constantIndex(v))
 
 	case *syntax.FStringExpr:
-		fmt.Print("compiling FstringExpr")
 		fcomp.emit1(CONSTANT, fcomp.pcomp.constantIndex(e.Raw))
 
 	case *syntax.ListExpr:
