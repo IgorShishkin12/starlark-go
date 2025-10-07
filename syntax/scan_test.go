@@ -50,13 +50,12 @@ func scan(src interface{}) (tokens string, err error) {
 			buf.WriteString(Quote(val.string, false))
 		case FSTRING_PART:
 			if prevtok == FSTRING_PART {
-				buf.WriteString(")+\"" + val.string + "\"+str(")
+				buf.WriteString(")+" + Quote(val.string, false) + "+str(")
 			} else {
-				buf.WriteString("\"" + val.string + "\"+str(")
+				buf.WriteString(Quote(val.string, false) + "+str(")
 			}
 		case FSTRING_END:
-			buf.WriteString(")+\"" + val.string + "\"")
-
+			buf.WriteString(")+" + Quote(val.string, false))
 		default:
 			buf.WriteString(tok.String())
 		}
@@ -82,6 +81,8 @@ func TestScannerFstring(t *testing.T) {
 		"@{{@",
 		"@}}@",
 		"@hehe{1}haha{2}hoho{3}hihi{4}huhu{5}@",
+		"@hehe\\\\@",
+		"@hehe\\'@",
 	} // @ for bracket
 	convert_simple := func(body string) string {
 		want_body := strings.Replace(body, "@", `"`, -1)
@@ -92,17 +93,24 @@ func TestScannerFstring(t *testing.T) {
 		return want_body
 	}
 	targets := []string{
-		convert_simple(bodys[0]),
+		"",
 		`"hehe"+str( 0 )+"" EOF`,
 		`"hehe"+str( 0 )+"hehe" EOF`,
 		`"hehe"+str( 1 + 1 )+"" EOF`,
-		convert_simple(bodys[4]),
-		convert_simple(bodys[5]),
-		convert_simple(bodys[6]),
+		"",
+		"",
+		"",
 		`"{"+str( 0 )+"}" EOF`,
-		convert_simple(bodys[8]),
-		convert_simple(bodys[9]),
+		"",
+		"",
 		`"hehe"+str( 1 "haha"+str( 2 "hoho"+str( 3 "hihi"+str( 4 "huhu"+str( 5 )+"" EOF`,
+		"",
+		`"hehe'"`,
+	}
+	for id, target := range targets {
+		if len(target) == 0 {
+			targets[id] = convert_simple(bodys[id])
+		}
 	}
 
 	for _, bracket := range brackets {

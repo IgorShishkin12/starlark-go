@@ -1012,7 +1012,7 @@ func (sc *scanner) shouldScanFstring(c rune) bool { // we falling into scanning 
 }
 
 func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token { //tokens: full_fstring(if it simple string), fstring_part, end_expr_fstring
-	// start := sc.pos
+	start := sc.pos
 	triple := len(sc.rest) >= 3 && sc.rest[0] == byte(quote) && sc.rest[1] == byte(quote) && sc.rest[2] == byte(quote)
 
 	isbeginning := true
@@ -1139,6 +1139,11 @@ func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token { //tokens: fu
 
 	// s, _, isByte, err := unquote(val.raw)
 	val.string = val.raw[startQuote : raw.Len()-quoteCount]
+	s, _, _, err := unquote("\"" + val.string + "\"")
+	val.string = s
+	if err != nil {
+		sc.error(start, err.Error())
+	}
 	if isend && isbeginning {
 		return FSTRING_FULL
 	}
