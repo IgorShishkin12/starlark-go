@@ -132,11 +132,11 @@ func TestExprParseTrees(t *testing.T) {
 	}
 }
 
-func TestTmp(t *testing.T){
+func TestParseTmp(t *testing.T) {
 
 	t.Log("---------------------------------------\n")
-	text := `f"he{7+7}he"`
-		e, err := syntax.ParseExpr("foo.star", text, 0)
+	text := `f"he{7}he"`
+	e, err := syntax.ParseExpr("foo.star", text, 0)
 	var got string
 	if err != nil {
 		got = stripPos(err)
@@ -146,6 +146,53 @@ func TestTmp(t *testing.T){
 
 	t.Log(got)
 	t.Log("---------------------------------------\n")
+}
+
+func TestParseTmp2(t *testing.T) {
+
+	t.Log("---------------------------------------\n")
+	text := `"he{}he".format(7)`
+	e, err := syntax.ParseExpr("foo.star", text, 0)
+	var got string
+	if err != nil {
+		got = stripPos(err)
+	} else {
+		got = treeString(e)
+	}
+
+	t.Log(got)
+	t.Log("---------------------------------------\n")
+}
+
+//todo: add tests for:
+// f"hehe"
+// f"hehe{0}"
+// f"hehe{1+1}" //probably parse, not scan
+// f"{}"
+// f"hehe{f"haha{7}"}hehe" //parse?
+// f'hehe{7}hehe'
+
+func TestStmtParseFstring(t *testing.T) {
+	for _, test := range []struct {
+		input, same string
+	}{
+		{`f"hehe"`, `"hehe"`},
+		{`f"hehe{0}"`, `"hehe{}".format(0)`},
+		{`f"hehe{1+1}"`, `"hehe{}".format(1+1)`},
+		{`f"hehe{f"haha{7}"}hehe"`, `"hehe{}hehe".format("haha{}".format(7))`},
+	} {
+		expr, err := syntax.Parse("foo.star", test.input, 0)
+		if err != nil {
+			t.Errorf("parse `%s` failed: %v", test.input, stripPos(err))
+			continue
+		}
+		expr_want, _ := syntax.Parse("foo.star", test.same, 0) // other tests check wheter this is adequate
+		got := treeString(expr.Stmts[0])
+		got_want := treeString(expr_want.Stmts[0])
+		if got != got_want {
+			t.Errorf("parse `%s` = %s, want %s", test.input, got, got_want)
+		}
+	}
 }
 
 func TestStmtParseTrees(t *testing.T) {
