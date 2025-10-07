@@ -132,46 +132,6 @@ func TestExprParseTrees(t *testing.T) {
 	}
 }
 
-func TestParseTmp(t *testing.T) {
-
-	t.Log("---------------------------------------\n")
-	text := `f"he{7}he"`
-	e, err := syntax.ParseExpr("foo.star", text, 0)
-	var got string
-	if err != nil {
-		got = stripPos(err)
-	} else {
-		got = treeString(e)
-	}
-
-	t.Log(got)
-	t.Log("---------------------------------------\n")
-}
-
-func TestParseTmp2(t *testing.T) {
-
-	t.Log("---------------------------------------\n")
-	text := `"he{}he".format(7)`
-	e, err := syntax.ParseExpr("foo.star", text, 0)
-	var got string
-	if err != nil {
-		got = stripPos(err)
-	} else {
-		got = treeString(e)
-	}
-
-	t.Log(got)
-	t.Log("---------------------------------------\n")
-}
-
-//todo: add tests for:
-// f"hehe"
-// f"hehe{0}"
-// f"hehe{1+1}" //probably parse, not scan
-// f"{}"
-// f"hehe{f"haha{7}"}hehe" //parse?
-// f'hehe{7}hehe'
-
 func TestStmtParseFstring(t *testing.T) {
 	for _, test := range []struct {
 		input, same string
