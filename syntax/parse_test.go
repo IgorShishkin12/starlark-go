@@ -136,22 +136,19 @@ func TestStmtParseFstring(t *testing.T) {
 	for _, test := range []struct {
 		input, same string
 	}{
-		//fail because of moving to fstringexpr
-		// {`f"hehe"`, `"hehe"`},
-		// {`f"hehe{0}"`, `"hehe{}".format(0)`},
-		// {`f"hehe{1+1}"`, `"hehe{}".format(1+1)`},
-		// {`f"hehe{f"haha{7}"}hehe"`, `"hehe{}hehe".format("haha{}".format(7))`},
+		{`f"hehe"`, `(ExprStmt X="hehe")`},
+		{`f"hehe{0}"`, `(ExprStmt X=(FStringExpr Raw= RawParts=(f"hehe{ }") StringParts=(hehe ) Args=(0)))`},
+		{`f"hehe{1+1}"`, `(ExprStmt X=(FStringExpr Raw= RawParts=(f"hehe{ }") StringParts=(hehe ) Args=((BinaryExpr X=1 Op=+ Y=1))))`},
+		{`f"hehe{f"haha{7}"}hehe"`, `(ExprStmt X=(FStringExpr Raw= RawParts=(f"hehe{ }hehe") StringParts=(hehe hehe) Args=((FStringExpr Raw= RawParts=(f"haha{ }") StringParts=(haha ) Args=(7)))))`},
 	} {
 		expr, err := syntax.Parse("foo.star", test.input, 0)
 		if err != nil {
 			t.Errorf("parse `%s` failed: %v", test.input, stripPos(err))
 			continue
 		}
-		expr_want, _ := syntax.Parse("foo.star", test.same, 0) // other tests check wheter this is adequate
 		got := treeString(expr.Stmts[0])
-		got_want := treeString(expr_want.Stmts[0])
-		if got != got_want {
-			t.Errorf("parse `%s` = %s, want %s", test.input, got, got_want)
+		if got != test.same {
+			t.Errorf("parse `%s` = %s, want %s", test.input, got, test.same)
 		}
 	}
 }
