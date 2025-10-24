@@ -749,6 +749,8 @@ start:
 				sc.fstringStack.Pop()
 			}
 			return resp
+		} else {
+			panic("unreacheable")
 		}
 		//probably no other options
 	}
