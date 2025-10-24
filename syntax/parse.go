@@ -14,7 +14,6 @@ package syntax
 import (
 	// "fmt"
 	"log"
-	"strings"
 )
 
 // Enable this flag to print the token stream and log.Fatal on the first error.
@@ -840,24 +839,21 @@ func (p *parser) parsePrimary() Expr {
 		response := Literal{Token: token, TokenPos: pos, Raw: raw, Value: val}
 		return &response
 	case FSTRING_PART:
-		resultString := strings.Builder{}
-		resultString.WriteString(p.tokval.string)
+		resultExpr := FStringExpr{}
+		resultExpr.StringParts = append(resultExpr.StringParts, p.tokval.string)
+		resultExpr.RawParts = append(resultExpr.RawParts, p.tokval.raw)
 		toktmp := p.tok
-		startpos := p.in.pos
 		pos := p.nextToken()
-		callFormatExpr := CallExpr{Lparen: pos}
+		resultExpr.TokenPos = pos
 		for toktmp != FSTRING_END {
-			tmpexpr := p.parseTestPrec(0)
-			callFormatExpr.Args = append(callFormatExpr.Args, tmpexpr)
-			resultString.WriteString("{}")
-			resultString.WriteString(p.tokval.string)
+			x := p.parseTest()
+			resultExpr.Args = append(resultExpr.Args, x)
+			resultExpr.StringParts = append(resultExpr.StringParts, p.tokval.string)
+			resultExpr.RawParts = append(resultExpr.RawParts, p.tokval.raw)
 			toktmp = p.tok
 			p.nextToken()
 		}
-		data := resultString.String()
-		callFormatExpr.Fn = &DotExpr{X: &Literal{Raw: "\"" + data + "\"", Value: data, TokenPos: startpos, Token: STRING}, Name: &Ident{Name: "format"}}
-		callFormatExpr.Rparen = p.in.pos //todo: fix this
-		return &callFormatExpr
+		return &resultExpr
 
 	case LBRACK:
 		return p.parseList()

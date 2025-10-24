@@ -79,8 +79,20 @@ func TestFstring(t *testing.T) {
 		want string // disassembled code
 	}{
 		{
-			`f"hehehe"`,
-			`constant "abcd"; return`,
+			`f"hehehe{7}"`,
+			`constant "hehehe{}"; attr<0>; constant 7; call<256>; return`,
+		},
+		{
+			`f"hehehe{7}" + f"hehe"`,
+			`constant "hehehe{}"; attr<0>; constant 7; call<256>; constant "hehe"; plus; return`,
+		},
+		{
+			`f"hehe" + f"hehe{7}"`,
+			`constant "hehe"; constant "hehe{}"; attr<0>; constant 7; call<256>; plus; return`,
+		},
+		{
+			`f"hehe" + f"hehe"`,
+			`constant "hehe"; constant "hehe"; plus; return`,
 		},
 	} {
 		expr, err := syntax.ParseExpr("in.star", test.src, 0)
@@ -94,11 +106,11 @@ func TestFstring(t *testing.T) {
 			continue
 		}
 		got := disassemble(Expr(syntax.LegacyFileOptions(), expr, "<expr>", locals).Toplevel)
-		t.Logf("disassemble: %s",got)
-		// if test.want != got {
-		// 	t.Errorf("expression <<%s>> generated <<%s>>, want <<%s>>",
-		// 		test.src, got, test.want)
-		// }
+		// t.Errorf("disassemble: %s", got)
+		if test.want != got {
+			t.Errorf("expression <<%s>> generated <<%s>>, want <<%s>>",
+				test.src, got, test.want)
+		}
 	}
 }
 

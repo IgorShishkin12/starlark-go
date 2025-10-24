@@ -242,9 +242,11 @@ func (*FStringExpr) expr()   {}
 
 type FStringExpr struct {
 	commentsRef
-	TokenPos Position
-	Raw      string
-	Args     []Expr
+	TokenPos    Position
+	Raw         string
+	RawParts    []string
+	StringParts []string
+	Args        []Expr
 }
 
 func (x *FStringExpr) Span() (start, end Position) {

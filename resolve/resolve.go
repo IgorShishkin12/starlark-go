@@ -645,7 +645,71 @@ func (r *resolver) expr(e syntax.Expr) {
 	case *syntax.Ident:
 		r.use(e)
 	case *syntax.FStringExpr:
-		
+		// r.expr(e.Fn)
+		// var seenVarargs, seenKwargs bool
+		// var seenName map[string]bool
+		// var n int
+		var p int
+		for _, arg := range e.Args {
+			// pos, _ := arg.Span()
+			if unop, ok := arg.(*syntax.UnaryExpr); ok && unop.Op == syntax.STARSTAR {
+				// **kwargs
+				// if seenKwargs {
+				// 	r.errorf(pos, "multiple **kwargs not allowed")
+				// }
+				// seenKwargs = true
+				r.expr(arg)
+			// } else if ok && unop.Op == syntax.STAR {//*args or **kwargs
+				// *args
+				// if seenKwargs {
+				// 	r.errorf(pos, "*args may not follow **kwargs")
+				// } else if seenVarargs {
+				// 	r.errorf(pos, "multiple *args not allowed")
+				// }
+				// seenVarargs = true
+				// r.expr(arg)
+			// } else if binop, ok := arg.(*syntax.BinaryExpr); ok && binop.Op == syntax.EQ { //args in form of f(foo=1,loo=2)
+				// k=v
+				// n++
+				// if seenKwargs {
+				// 	r.errorf(pos, "keyword argument may not follow **kwargs")
+				// } else if seenVarargs {
+				// 	r.errorf(pos, "keyword argument may not follow *args")
+				// }
+				// x := binop.X.(*syntax.Ident)
+				// if seenName[x.Name] {
+				// 	r.errorf(x.NamePos, "keyword argument %q is repeated", x.Name)
+				// } else {
+				// 	if seenName == nil {
+				// 		seenName = make(map[string]bool)
+				// 	}
+				// 	seenName[x.Name] = true
+				// }
+				// r.expr(binop.Y)
+			} else {
+				// positional argument
+				p++
+				// if seenVarargs {
+				// 	r.errorf(pos, "positional argument may not follow *args")
+				// } else if seenKwargs {
+				// 	r.errorf(pos, "positional argument may not follow **kwargs")
+				// } else 
+				// if len(seenName) > 0 {
+				// 	r.errorf(pos, "positional argument may not follow named")
+				// }
+				r.expr(arg)
+			}
+		}
+
+		// Fail gracefully if compiler-imposed limit is exceeded.
+		if p >= 256 {
+			pos, _ := e.Span()
+			r.errorf(pos, "%v arguments in fstring, limit is 255", p)
+		}
+		// if n >= 256 {
+		// 	pos, _ := e.Span()
+		// 	r.errorf(pos, "%v keyword arguments in call, limit is 255", n)
+		// }
 	case *syntax.Literal:
 
 	case *syntax.ListExpr:
