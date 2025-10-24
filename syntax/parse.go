@@ -14,6 +14,7 @@ package syntax
 import (
 	// "fmt"
 	"log"
+	"strings"
 )
 
 // Enable this flag to print the token stream and log.Fatal on the first error.
@@ -840,7 +841,7 @@ func (p *parser) parsePrimary() Expr {
 		return &response
 	case FSTRING_PART:
 		resultExpr := FStringExpr{}
-		resultExpr.StringParts = append(resultExpr.StringParts, p.tokval.string)
+		resultExpr.StringParts = append(resultExpr.StringParts, strings.ReplaceAll(strings.ReplaceAll(p.tokval.string, "}", "}}"), "{", "{{"))
 		resultExpr.RawParts = append(resultExpr.RawParts, p.tokval.raw)
 		toktmp := p.tok
 		pos := p.nextToken()
@@ -848,7 +849,7 @@ func (p *parser) parsePrimary() Expr {
 		for toktmp != FSTRING_END {
 			x := p.parseTest()
 			resultExpr.Args = append(resultExpr.Args, x)
-			resultExpr.StringParts = append(resultExpr.StringParts, p.tokval.string)
+			resultExpr.StringParts = append(resultExpr.StringParts, strings.ReplaceAll(strings.ReplaceAll(p.tokval.string, "}", "}}"), "{", "{{"))
 			resultExpr.RawParts = append(resultExpr.RawParts, p.tokval.raw)
 			toktmp = p.tok
 			p.nextToken()

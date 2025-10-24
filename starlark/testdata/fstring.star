@@ -10,6 +10,7 @@ load("assert.star", "assert")
 name = "Starlark"
 version = 1
 assert.eq(f"hello {name}", "hello Starlark")
+assert.eq(f"{{}} {name}", "{} Starlark")
 assert.eq(f"{name} {version}", "Starlark 1")
 assert.eq(f"{{ literal }}", "{ literal }")   # doubled braces → literal
 
