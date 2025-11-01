@@ -83,6 +83,7 @@ func TestScannerFstring(t *testing.T) {
 		"@hehe{1}haha{2}hoho{3}hihi{4}huhu{5}@",
 		"@hehe\\\\@",
 		"@hehe\\'@",
+		`@{ {@x@:3} }@`,
 	} // @ for bracket
 	convert_simple := func(body string) string {
 		want_body := strings.Replace(body, "@", `"`, -1)
@@ -106,6 +107,7 @@ func TestScannerFstring(t *testing.T) {
 		`"hehe"+str( 1 "haha"+str( 2 "hoho"+str( 3 "hihi"+str( 4 "huhu"+str( 5 )+"" EOF`,
 		"",
 		`"hehe'"`,
+		`""+str( { "x" : 3 } )+"" EOF`,
 	}
 	for id, target := range targets {
 		if len(target) == 0 {

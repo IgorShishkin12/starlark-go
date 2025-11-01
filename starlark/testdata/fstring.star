@@ -11,8 +11,10 @@ name = "Starlark"
 version = 1
 assert.eq(f"hello {name}", "hello Starlark")
 assert.eq(f"{{}} {name}", "{} Starlark")
+assert.eq(f"{{{{}}}} {name}", "{{}} Starlark")
 assert.eq(f"{name} {version}", "Starlark 1")
 assert.eq(f"{{ literal }}", "{ literal }")   # doubled braces → literal
+assert.eq(f"start{ {"x":3} }end", "start{\"x\": 3}end")   # dict
 
 # --- conversion flags -------------------------------------------------------
 # todo: future plans

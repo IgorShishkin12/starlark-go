@@ -716,9 +716,10 @@ start:
 	sc.startToken(val)
 	if sc.shouldScanFstring(c) {
 		if c == '}' {
-			//assert sc.fstring.Peek().val.tokentype == '{' todo
-			tmpval, _ := sc.fstringStack.Pop()
-			// tmpval, _ := sc.fstringStack.Peek()
+			tmpval, isok := sc.fstringStack.Pop()
+			if !isok {
+				sc.error(sc.pos, "closing brace (}) without opening one ({)")
+			}
 			resp := sc.scanFstring(val, tmpval.tokenType)
 			if resp == FSTRING_END || resp == FSTRING_FULL {
 				sc.fstringStack.Pop()
@@ -727,7 +728,6 @@ start:
 		} else {
 			panic("unreacheable")
 		}
-		//probably no other options
 	}
 
 	// comma (common case)
@@ -966,25 +966,6 @@ func (sc *scanner) shouldScanFstring(c rune) bool { // we falling into scanning 
 	if c == '}' && val.tokenType == '{' {
 		return true
 	}
-	//todo: everything after is always false?
-	if c == '\'' && val.tokenType == '\'' {
-		return true
-	}
-	if c == '"' && val.tokenType == '"' {
-		return true
-	}
-	if len(sc.rest) >= 3 {
-		if val.tokenType == '+' { // + for '''
-			if c == '\'' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c) {
-				return true
-			}
-		}
-		if val.tokenType == '-' { // - for """
-			if c == '"' && sc.rest[1] == byte(c) && sc.rest[2] == byte(c) {
-				return true
-			}
-		}
-	}
 	return false
 }
 
@@ -1065,10 +1046,6 @@ func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token { //tokens: fu
 		}
 	} else {
 		// triple-quoted string literal
-		// sc.readRune()
-		// raw.WriteRune(quote)
-		// sc.readRune()
-		// raw.WriteRune(quote)
 
 		for {
 			if sc.eof() {
@@ -1112,9 +1089,7 @@ func (sc *scanner) scanFstring(val *tokenValue, quote rune) Token { //tokens: fu
 		}
 	}
 	val.raw = raw.String()
-	// val.raw = raw.String()
 
-	// s, _, isByte, err := unquote(val.raw)
 	val.string = val.raw[startQuote : raw.Len()-quoteCount]
 	s, _, _, err := unquote("\"" + val.string + "\"")
 	val.string = s
