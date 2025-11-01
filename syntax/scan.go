@@ -35,10 +35,10 @@ const (
 	FLOAT  // 1.23e45
 	STRING // "foo" or 'foo' or '''foo''' or r'foo' or r"foo"
 	BYTES  // b"foo", etc
-	// FSTRING
-	FSTRING_FULL
-	FSTRING_PART
-	FSTRING_END
+	// FSTRING (examples given with " bracket, but fstring can use all four (", ', """, '''))
+	FSTRING_FULL // f"foo" i.e. 'f' with regular string
+	FSTRING_PART // f"foo{ or }foo{
+	FSTRING_END  // }foo" or }"
 
 	// Punctuation
 	PLUS          // +
@@ -316,35 +316,10 @@ func (s *Stack[T]) Peek() (T, bool) {
 	return element, true
 }
 
-// PeekN returns the nth element from the end stack (0 is last)
-func (s *Stack[T]) PeekN(n int) (T, bool) {
-	if len(s.elements) < n {
-		var zeroValue T         // Create a zero value of type T
-		return zeroValue, false // Stack is empty
-	}
-	element := s.elements[len(s.elements)-1-n]
-	return element, true
-}
-
 // Size returns the number of elements in the stack
 func (s *Stack[T]) Size() int {
 	return len(s.elements)
 }
-
-// func main() {
-//     stringStack := Stack[string]{}
-//     stringStack.Push("Hello")
-//     stringStack.Push("World")
-
-//     fmt.Println("Size of string stack:", stringStack.Size()) // Output: Size of string stack: 2
-
-//     element, ok := stringStack.Pop()
-//     if ok {
-//         fmt.Println("Popped element:", element) // Output: Popped element: World
-//     }
-
-//     fmt.Println("Size of string stack after pop:", stringStack.Size()) // Output: Size of string stack after pop: 1
-// }
 
 type fstringStackNode struct {
 	pos        Position
